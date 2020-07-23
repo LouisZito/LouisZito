@@ -54,18 +54,18 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
     /**
      * Insert into the priority queue, maintaining heap order.
      * Duplicates are allowed.
-     * @param x the item to insert.
+     * @param insertNo the item to insert.
      */
-    public void insert( AnyType x )
+    public void insert( AnyType insertNo )
     {
         if( currentSize == array.length - 1 )
             enlargeArray( array.length * 2 + 1 );
 
             // Percolate up
         int hole = ++currentSize;
-        for( array[ 0 ] = x; x.compareTo( array[ hole / 2 ] ) < 0; hole /= 2 )
+        for( array[ 0 ] = insertNo; insertNo.compareTo( array[ hole / 2 ] ) < 0; hole /= 2 )
             array[ hole ] = array[ hole / 2 ];
-        array[ hole ] = x;
+        array[ hole ] = insertNo;
     }
 
 
@@ -108,7 +108,7 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
      * Establish heap order property from an arbitrary
      * arrangement of items. Runs in linear time.
      */
-    private void buildHeap( )
+    void buildHeap( )
     {
         for( int i = currentSize / 2; i > 0; i-- )
             percolateDown( i );
@@ -158,8 +158,8 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
         }
         array[ hole ] = tmp;
     }
-
-        // Test program
+    
+/*	// Test program
     public static void main( String [ ] args ) throws UnderflowException
     {
         int numItems = 10000;
@@ -167,9 +167,10 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
         int i = 37;
 
         for( i = 37; i != 0; i = ( i + 37 ) % numItems )
+        	System.out.println(i);
             h.insert( i );
         for( i = 1; i < numItems; i++ )
             if( h.deleteMin( ) != i )
                 System.out.println( "Oops! " + i );
-    }
+    }*/
 }
