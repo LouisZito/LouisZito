@@ -22,7 +22,8 @@ public class Server {
 				System.out.println("Preparing for client connection...");
 				Socket clientSocket = serverSocket.accept();
 				System.out.println("Connection accepted from " + clientSocket);
-				
+				//using generated client socket for output/input streams
+				//bidirectional host/client communications
 				ServerWorker worker = new ServerWorker(clientSocket);
 				worker.start();
 			}//end while
