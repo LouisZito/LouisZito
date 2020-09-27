@@ -1,9 +1,15 @@
 package dev.tilegame;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+
+//to see contents of images in res folder F5
+//to access contents proj, prop, lib, add path of that parent folder eg res
 
 import dev.tilegame.Display.Display;
+import dev.tilegame.gfx.ImageLoader;
 
 //implement Runnable to make a thread
 public class Game implements Runnable{
@@ -18,6 +24,7 @@ public class Game implements Runnable{
 	private BufferStrategy bs;
 	private Graphics g;
 	
+	
 		public Game(String title, int width, int height) {
 			this.width = width;
 			this.height = height;
@@ -27,7 +34,7 @@ public class Game implements Runnable{
 		
 	//initialized game graphic in run method
 	private void init() {
-		display = new Display(title, width, height);	
+		display = new Display(title, width, height);
 	}
 	
 	//update variables loop
@@ -45,9 +52,12 @@ public class Game implements Runnable{
 			return;
 		}
 		g = bs.getDrawGraphics();
+		
+		//clear before ever render
+
+		
 		//draw here
 		
-		g.fillRect(0, 0, width, height);
 		
 		//end drawing
 		bs.show();
