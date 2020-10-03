@@ -63,6 +63,9 @@ public class ServerWorker extends Thread{
 				else if ("join".equalsIgnoreCase(cmd)) {
 					handleJoin(tokens);
 				}//end else if
+				else if ("leave".equalsIgnoreCase(cmd)) {
+					handleLeave(tokens);
+				}//end else if
 				else {
 					String msg = "unknown " + cmd + "\n";
 					outputStream.write(msg.getBytes());
@@ -73,12 +76,22 @@ public class ServerWorker extends Thread{
 		clientSocket.close();
 	}//end handleClientSocket method
 	
+	//leave #topic-grouped chat environment
+	//cmd: leave #topic
+	private void handleLeave(String[] tokens) {
+		if (tokens.length > 1) {
+			String topic = tokens[1];
+			topicSet.remove(topic);			
+		}//end if	
+	}//end handleLeave
+
 	//testing for topic being established
 	public boolean isMemberOfTopic(String topic) {
 		return topicSet.contains(topic);
 	}//end isMemberOfTopic
 	
 	//method creates new #topic grouping for chat environment
+	//cmd: join #topic
 	private void handleJoin(String[] tokens) {
 		if (tokens.length > 1) {
 			String topic = tokens[1];
@@ -100,7 +113,7 @@ public class ServerWorker extends Thread{
 			//1st char == #, enter topic grouped chat
 			if (isTopic) {
 				if (worker.isMemberOfTopic(sendTo)) {
-					String outMsg = "msg: " + sendTo + ":" + login + " " + body + "\n";
+					String outMsg = "Topic-msg: " + sendTo + "from " + login + ": " + body + "\n";
 					worker.send(outMsg);
 				}//end if
 				
@@ -171,6 +184,7 @@ public class ServerWorker extends Thread{
 			else {
 				String msg = "error login\n";
 				outputStream.write(msg.getBytes());
+				System.err.println("Login failed for " + login);
 			}//end else
 		}//end if
 		
