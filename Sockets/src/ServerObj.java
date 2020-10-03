@@ -8,7 +8,7 @@ public class ServerObj extends Thread{
 
 	private int serverPort;
 	
-	private ArrayList<ServerWorker> workerList = new ArrayList<>();
+	private static ArrayList<ServerWorker> workerList = new ArrayList<>();
 
 	public ServerObj(int serverPort) {
 		this.serverPort = serverPort;		
@@ -41,5 +41,10 @@ public class ServerObj extends Thread{
 		}//end cat
 		
 	}
+
+	//on logoff remove that instance from the current workerList
+	public static void removeWorker(ServerWorker serverWorker) {
+		workerList.remove(serverWorker);
+	}//end removeWorker
 
 }//end class

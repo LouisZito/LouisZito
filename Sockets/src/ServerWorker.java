@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -13,10 +14,11 @@ import org.apache.commons.lang.StringUtils;
 //for each user that logs on to the server
 public class ServerWorker extends Thread{
 
-	private Socket clientSocket;
+	private final Socket clientSocket;
 	private String login = null;
-	private ServerObj serverObj;
+	private final ServerObj serverObj;
 	private OutputStream outputStream;
+	private HashSet<String> topicSet = new HashSet<>();
 
 	public ServerWorker(ServerObj serverObj, Socket clientSocket) {
 		this.clientSocket = clientSocket;
@@ -46,11 +48,21 @@ public class ServerWorker extends Thread{
 			if (tokens != null && tokens.length > 0) {
 				String cmd = tokens[0];
 				if("Bye".equalsIgnoreCase(cmd)) {
+					handleLogoff();
 					break;
 				}//end if
 				else if ("login".equalsIgnoreCase(cmd)){
 					handleLogin(outputStream, tokens);
-				}
+				}//end else if
+				//direct messaging option
+				else if ("msg".equalsIgnoreCase(cmd)){
+					//split into three tokens with last containing complete msg
+					String[] tokensMsg = StringUtils.split(line, null, 3);
+					handleMessage(outputStream, tokensMsg);
+				}//end else if
+				else if ("join".equalsIgnoreCase(cmd)) {
+					handleJoin(tokens);
+				}//end else if
 				else {
 					String msg = "unknown " + cmd + "\n";
 					outputStream.write(msg.getBytes());
@@ -61,6 +73,63 @@ public class ServerWorker extends Thread{
 		clientSocket.close();
 	}//end handleClientSocket method
 	
+	//testing for topic being established
+	public boolean isMemberOfTopic(String topic) {
+		return topicSet.contains(topic);
+	}//end isMemberOfTopic
+	
+	//method creates new #topic grouping for chat environment
+	private void handleJoin(String[] tokens) {
+		if (tokens.length > 1) {
+			String topic = tokens[1];
+			topicSet.add(topic);			
+		}//end handleJoin
+		
+	}//end handleJoin
+
+	//method added for direct messaging option
+	private void handleMessage(OutputStream outputStream2, String[] tokens) throws IOException {
+		String sendTo = tokens[1];
+		String body = tokens[2];
+		//bool test for topic group starting with #
+		boolean isTopic = sendTo.charAt(0) == '#';		
+		List<ServerWorker> workerList = serverObj.getWorkerList();
+		//scroll through online workers to get msg recipient
+		for(ServerWorker worker: workerList) {		
+			//topic FOR
+			//1st char == #, enter topic grouped chat
+			if (isTopic) {
+				if (worker.isMemberOfTopic(sendTo)) {
+					String outMsg = "msg: " + sendTo + ":" + login + " " + body + "\n";
+					worker.send(outMsg);
+				}//end if
+				
+			}//end if
+			else {
+				if (sendTo.equalsIgnoreCase(worker.getLogin())) {
+					String outMsg = "msg: " + login + " " + body + "\n";
+					worker.send(outMsg);
+				}//end if
+			}//end else
+		}//end for
+		
+	}//end handleMessage
+
+	private void handleLogoff() throws IOException {
+		ServerObj.removeWorker(this);
+		List<ServerWorker> workerList = serverObj.getWorkerList();
+
+		//send other online users current users status
+		String onlineMsg = "offline " + login + "\n";
+		for(ServerWorker worker: workerList) {
+			//avoid notification of self
+			if (!login.contentEquals(worker.getLogin())) {
+				worker.send(onlineMsg);
+			}//end if
+		}//end for
+		clientSocket.close();
+	}
+
 	public String getLogin() {
 		return login;
 	}//end getLogin
@@ -70,7 +139,7 @@ public class ServerWorker extends Thread{
 			String login = tokens[1];
 			String password = tokens[2];
 			
-			if ((login.equals("guest") && password.equals("guest")) || (login.contentEquals("jim") && password.contentEquals("jim")))  {
+			if ((login.equals("louis") && password.equals("louis")) || (login.contentEquals("jim") && password.contentEquals("jim")))  {
 				String msg = "ok login\n";
 				outputStream.write(msg.getBytes());
 				this.login = login;
@@ -80,14 +149,22 @@ public class ServerWorker extends Thread{
 				List<ServerWorker> workerList = serverObj.getWorkerList();
 					//sends current user all other online logins
 					for(ServerWorker worker: workerList) {
-						String msg2 = "online " + worker.getLogin() + "\n";
-						send(msg2);
+						if (worker.getLogin() != null) {
+							//avoid notification of self
+							if (!login.contentEquals(worker.getLogin())) {							
+								String msg2 = "online " + worker.getLogin() + "\n";
+								send(msg2);
+							}//end if
+						}//end if
 					}//end for
 					
 					//send other online users current users status
 					String onlineMsg = "online " + login + "\n";
 					for(ServerWorker worker: workerList) {
-						worker.send(onlineMsg);
+						//avoid notification of self
+						if (!login.contentEquals(worker.getLogin())) {
+							worker.send(onlineMsg);
+						}//end if
 					}//end for
 					
 			}//end guest if
@@ -100,7 +177,10 @@ public class ServerWorker extends Thread{
 	}//end handleLogin
 
 	private void send(String msg) throws IOException {
-		outputStream.write(msg.getBytes());
+		//avoid notification of nulls in List
+		if(login != null) {
+			outputStream.write(msg.getBytes());
+		}//end if
 	}//end send
 	
 	

@@ -1,4 +1,8 @@
-
+//Louis Zito
+//10/2/20
+//Networking PA1
+//Chat app
+//cmds: login, bye, msg (DM), join (topic-based group messaging)
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
