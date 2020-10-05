@@ -1,98 +1,50 @@
-//ChatClient.java
+//Louis Zito
+//10/5/20
+//Networking PA1
 
 import javax.swing.*;
-
 import java.awt.FlowLayout;
-
 import java.awt.event.ActionEvent;
-
 import java.awt.event.ActionListener;
-
 import java.io.*;
-
 import java.net.Socket;
-
 public class ChatClient {
 
      
-
-      static JFrame chatWindow = new JFrame("Chat Application");
-
+//GUI implementation componenents
+    static JFrame chatWindow = new JFrame("Chat Application");
     static JTextArea chatArea = new JTextArea(22, 40);
-
     static JTextField textField = new JTextField(40);
-
     static JLabel blankLabel = new JLabel("           ");
-
     static JButton sendButton = new JButton("Send");
-
     static BufferedReader in;
-
     static PrintWriter out;
-
     static JLabel nameLabel = new JLabel("         ");
 
    
-
-    ChatClient()
-
-    {
-
-       
-
+//setting GUI fields
+    ChatClient(){
         chatWindow.setLayout(new FlowLayout());
-
-      
-
         chatWindow.add(nameLabel);
-
         chatWindow.add(new JScrollPane(chatArea));
-
         chatWindow.add(blankLabel);
-
         chatWindow.add(textField);
-
         chatWindow.add(sendButton);
-
         chatWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         chatWindow.setSize(475, 500);
-
         chatWindow.setVisible(true);
-
-       
-
         textField.setEditable(false);
-
         chatArea.setEditable(false);
-
-       
-
         sendButton.addActionListener(new Listener());
-
         textField.addActionListener(new Listener());
-
     }
 
-   
-
-   
-
-    void startChat() throws Exception
-
-    {
-
+    void startChat() throws Exception{
        String ipAddress = JOptionPane.showInputDialog(
-
                 chatWindow,
-
                 "Enter IP Address:",
-
                 "IP Address Required!!",
-
                 JOptionPane.PLAIN_MESSAGE);    
-
- 
 
        Socket soc = new Socket(ipAddress, 9806);
 
@@ -100,108 +52,48 @@ public class ChatClient {
 
        out = new PrintWriter(soc.getOutputStream(), true);
 
-       while (true)
-
-       {
-
+       while (true){
          String str = in.readLine();
-
-           if (str.equals("NAMEREQUIRED"))
-
-           {
-
+           if (str.equals("NAMEREQUIRED")){
            String name = JOptionPane.showInputDialog(
-
                        chatWindow,
-
                        "Enter a unique name:",
-
                        "Name Required!!",
-
                        JOptionPane.PLAIN_MESSAGE);
-
-          
-
                out.println(name);
-
-              
-
            }
 
-           else if(str.equals("NAMEALREADYEXISTS"))
-
-           {
-
+           else if(str.equals("NAMEALREADYEXISTS")){
            String name = JOptionPane.showInputDialog(
-
                        chatWindow,
-
                        "Enter another name:",
-
                        "Name Already Exits!!",
-
                        JOptionPane.WARNING_MESSAGE);
-
-          
-
                out.println(name);
-
            }
-
-           else if (str.startsWith("NAMEACCEPTED"))
-
-           {
-
+           else if (str.startsWith("NAMEACCEPTED")){
                textField.setEditable(true);
-
                nameLabel.setText("You are logged in as: "+str.substring(12));
-
-              
-
            }
-
-           else
-
-           {
-
+           else{
                chatArea.append(str + "\n");
-
            }
-
-       }
-
-   }
-
-   
+       }//while
+   }//startChat
 
       public static void main(String[] args) throws Exception {
 
-            // TODO Auto-generated method stub
-
             ChatClient client = new ChatClient();
-
             client.startChat();
+      }//end main
+}//end class
 
-      }
-
-}
-
+//Listener used for button/return clicks
 class Listener implements ActionListener
-
-{
-
-      @Override
-
+	{
+	@Override
       public void actionPerformed(ActionEvent e) {
-
-            // TODO Auto-generated method stub
-
             ChatClient.out.println(ChatClient.textField.getText());
-
             ChatClient.textField.setText("");
-
       }
-
-     
-
-}
+}//end Listener
