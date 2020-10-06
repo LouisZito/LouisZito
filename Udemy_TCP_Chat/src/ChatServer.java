@@ -63,6 +63,7 @@ class ConversationHandler extends Thread{
            }//while
             out.println("NAMEACCEPTED"+name);
             ChatServer.printWriters.add(out);
+            out.println(name + " just joined the chat!");
 
             while (true) {
                 String message = in.readLine();
