@@ -47,6 +47,7 @@ public class GameServer {
 				else {
 					player2 = ssc;
 				}
+				//this thread specific for server/client connections
 				Thread t = new Thread(ssc);
 				t.start();
 			}//end while
@@ -89,17 +90,46 @@ public class GameServer {
 					if (playerID == 1) {
 						player1ButtonNum = dataIn.readInt();
 						System.out.println("Player 1 clicked button #" + player1ButtonNum);
+						player2.sendButtonNum(player1ButtonNum);
 					}
 					else {
 						player2ButtonNum = dataIn.readInt();
 						System.out.println("Palyer 2 clicked button #" + player2ButtonNum);
+						player1.sendButtonNum(player2ButtonNum);
+					}
+					turnsMade++;
+					if (turnsMade == maxTurns) {
+						System.out.println("Max turns has been reached.");
+						break;
 					}
 				}//end while
+				player1.closeConnection();
+				player2.closeConnection();
 			}//end try
 			catch (IOException ex) {
 				System.out.println("IOException from Run SSC");
 			}
 		}//end run
+		
+		public void sendButtonNum(int n) {
+			try {
+				dataOut.writeInt(n);
+				dataOut.flush();
+			}
+			catch(IOException ex){
+				System.out.println("IOException from sendButtonNum() ssc");		
+			}
+		}//sendButtonNum
+		
+		public void closeConnection() {
+			try {
+				socket.close();
+				System.out.println("Connection closed.");
+			}
+			catch (IOException ex){
+				System.out.println("IOExcepiton on closeConnect server-side");
+			}
+		}//closeConnection
 	}//end ServerSideConnection
 	
 	public static void main(String[] args) {
